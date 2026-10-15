@@ -1,0 +1,7 @@
+family,method,accepted_endpoints,starts,distinct_roots,catalog_roots
+affine rank one,sc_sdg,159,160,15,15
+affine rank one,proximal_residual,160,160,15,15
+affine rank one,kkt_residual,160,160,15,15
+box QP,sc_sdg,101,256,27,27
+box QP,proximal_residual,109,256,10,27
+box QP,natural_kkt_residual,33,256,16,27

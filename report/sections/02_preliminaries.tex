@@ -1,0 +1,416 @@
+\section{Preliminaries}
+\label{sec:preliminaries}
+
+The analysis uses three related levels of variational information.  Limiting
+subdifferentials formulate local stationarity and the KKT system;
+level-proximal subdifferentials encode the global quadratic support required
+by an exact SDG value; and Moreau regularization turns weak convexity into
+well-posed proximal constructions.  This section introduces the objects in
+that order.
+
+\subsection{Variational framework}
+
+\subsubsection{Affine geometry and limiting stationarity}
+
+We work in finite-dimensional Euclidean spaces.  The symbols
+\(\ip{\cdot}{\cdot}\) and \(\norm{\cdot}\) denote the Euclidean inner product
+and norm; for a matrix, \(\norm{\cdot}\) is the induced operator norm, whereas
+\(\norm{\cdot}_{F}\) is the Frobenius norm.  We write
+\[
+  B_r(z):=\{u:\norm{u-z}\le r\},
+  \qquad
+  [t]_+:=\max\{t,0\},
+  \qquad
+  \dist(z,D):=\inf_{u\in D}\norm{z-u}.
+\]
+If \(D\) is nonempty, closed, and convex, its Euclidean projection is the
+single-valued map
+\[
+  \Pi_D(z):=\argmin_{u\in D}\norm{u-z}.
+\]
+Existence, uniqueness, and nonexpansiveness of this projection are standard
+\citep[Example~2.25 and Corollary~12.20]{RockafellarWets1998}.
+
+For an extended-real-valued function \(h:\R^n\to\R\cup\{+\infty\}\), its
+\emph{effective domain} is
+\(\operatorname{dom}h:=\{x:h(x)<+\infty\}\).  The function is proper when
+this set is nonempty, and it is lower semicontinuous at \(x\) when
+\(h(x)\le\liminf_{u\to x}h(u)\).  A set \(D\) is encoded by its indicator
+\[
+  \ind_D(x):=
+  \begin{cases}
+    0,       &x\in D,\\
+    +\infty, &x\notin D.
+  \end{cases}
+\]
+Thus minimizing \(h\) over \(D\) is the same as minimizing
+\(h+\ind_D\) over \(\R^n\).  For a convex set \(D\),
+\(\operatorname{ri}D\) denotes its interior relative to its affine hull.
+These conventions follow
+\citet[Sections~1.A--B and~2.H]{RockafellarWets1998}.
+
+Recall the affine feasible set and the standing nonemptiness assumption:
+\[
+  \Cset:=\{x\in\R^n:Ax=b\},
+  \qquad
+  \Cset\cap\operatorname{dom} f\ne\varnothing .
+\]
+Its tangent space is \(\Tspace:=\ker A\), and its normal space is
+\(\Tspace^\perp=\ran(A^\top)\).  The ordinary Lagrangian is
+\begin{equation}
+  \Lagr(x,y):=f(x)+\ip{y}{Ax-b},
+  \qquad y\in\R^m .
+  \label{eq:lagrangian}
+\end{equation}
+
+To specify the nonsmooth first-order condition precisely, let \(h\) be finite
+at \(x\).  Its regular (Fr\'echet) subdifferential is specified, for
+\(v\in\R^n\), by
+\begin{equation}
+  v\in\widehat{\partial}h(x)
+  \quad\Longleftrightarrow\quad
+  \liminf_{\substack{u\to x\\u\ne x}}
+  \frac{h(u)-h(x)-\ip{v}{u-x}}{\norm{u-x}}
+  \ge0 .
+  \label{eq:frechet-subdifferential}
+\end{equation}
+The limiting subdifferential is characterized by
+\begin{equation}
+  \begin{aligned}
+  v\in\partial h(x)
+  \quad\Longleftrightarrow\quad&
+  \text{there exist sequences }(x_k),(v_k)\text{ such that}\\
+  &x_k\to x,\quad h(x_k)\to h(x),\quad
+  v_k\in\widehat{\partial}h(x_k),\quad v_k\to v .
+  \end{aligned}
+  \label{eq:limiting-subdifferential}
+\end{equation}
+Both subdifferentials are empty outside \(\operatorname{dom}h\).  These
+definitions
+follow \citet[Definition~8.3]{RockafellarWets1998}; throughout,
+\(\partial h\) without an accent means the limiting subdifferential.  When
+\(h\) is continuously differentiable on a neighborhood of \(x\), the regular
+and limiting subdifferentials reduce to the ordinary gradient:
+\[
+  \widehat{\partial}h(x)=\partial h(x)=\{\nabla h(x)\}.
+\]
+See \citet[Exercise~8.8(b)]{RockafellarWets1998}.
+For a proper convex function, both subdifferentials coincide with the convex
+subdifferential: \(v\in\partial h(x)\) if and only if
+\(h(u)\ge h(x)+\ip{v}{u-x}\) for every \(u\)
+\citep[Proposition~8.12]{RockafellarWets1998}.
+If \(s\) is continuously differentiable on a neighborhood of \(x\), then
+the limiting subdifferential obeys the exact smooth-perturbation rule
+\citep[Exercise~8.8(c)]{RockafellarWets1998}:
+\[
+  \partial(h+s)(x)=\partial h(x)+\nabla s(x).
+\]
+
+For a closed set \(D\), the limiting normal cone is
+\[
+  N_D(x):=\partial\ind_D(x).
+\]
+For convex \(D\), this agrees with the familiar support description
+\[
+  N_D(x)
+  =
+  \{v:\ip{v}{u-x}\le0\ \text{for every }u\in D\},
+  \qquad x\in D,
+\]
+and is empty when \(x\notin D\); see
+\citet[Theorem~6.9 and Exercise~8.14]{RockafellarWets1998}.  In particular,
+\(N_{\Cset}(x)=\ran(A^\top)\) at every feasible point.  The limiting Fermat
+rule states that a local minimizer of a proper lower-semicontinuous function
+satisfies \(0\in\partial h(x)\); for a proper convex function this condition is
+also sufficient for global minimality
+\citep[Theorem~10.1]{RockafellarWets1998}.
+
+\begin{definition}[KKT pair]
+  A pair \((x,y)\in\R^n\times\R^m\) is a KKT pair for
+  \cref{eq:main-problem} if
+  \begin{equation}
+    Ax=b,
+    \qquad
+    0\in\partial f(x)+A^\top y .
+    \label{eq:kkt}
+  \end{equation}
+\end{definition}
+
+In a convex problem, \cref{eq:kkt} is sufficient for global primal--dual
+optimality by the global subgradient inequality.  In a nonconvex
+problem it is only a first-order condition: it can hold at a local minimum,
+saddle, or maximum.
+
+\subsubsection{Weak convexity and level-proximal support}
+
+The central curvature hypothesis is weak convexity, in the standard sense of
+\citet[Section~2]{DavisDrusvyatskiy2019}.
+
+\begin{definition}[Weak convexity]
+  A proper lower-semicontinuous function \(f:\R^n\to\R\cup\{+\infty\}\) is
+  \(\rho\)-weakly convex, for \(\rho\ge0\), if
+  \[
+    x\longmapsto f(x)+\frac{\rho}{2}\norm{x}^2
+  \]
+  is convex.
+\end{definition}
+
+For comparison, a proper function \(q\) is \(\mu\)-strongly convex,
+\(\mu>0\), when
+\(q-\mu\norm{\cdot}^{2}/2\) is convex
+\citep[Exercise~12.59]{RockafellarWets1998}.  Hence adding a quadratic with
+curvature strictly larger than \(\rho\) to a \(\rho\)-weakly convex function
+produces a strongly convex model and, when the model is lower
+semicontinuous, a unique minimizer.
+
+For every \(x\in\operatorname{dom}f\) and \(v\in\partial f(x)\), weak
+convexity gives the global lower model
+\begin{equation}
+  f(u)\ge f(x)+\ip{v}{u-x}
+          -\frac{\rho}{2}\norm{u-x}^2 ,
+  \label{eq:weak-convex-lower}
+\end{equation}
+for every \(u\in\R^n\); see
+\citet[Lemma~2.1]{DavisDrusvyatskiy2019} and the hypoconvexity
+characterization in
+\citet[Exercise~12.61]{RockafellarWets1998}.  At a differentiability point,
+one has \(v=\nabla f(x)\).  If \(f\in C^2(\R^n)\), weak convexity with modulus
+\(\rho\) is equivalent to the uniform Hessian bound
+\(\nabla^2 f(x)\succeq-\rho I\) for every \(x\).
+Weak convexity has become a standard model for nonsmooth nonconvex
+optimization because a sufficiently strong quadratic regularizer restores
+convexity; see \citet{DavisDrusvyatskiy2019}.
+
+Weak convexity also permits an exact affine sum rule.  Since
+\(f+\rho\norm{\cdot}^{2}/2\) and \(\ind_{\Cset}\) are convex, the qualification
+\[
+  \operatorname{ri}(\operatorname{dom}f)\cap\Cset\ne\varnothing
+\]
+gives
+\begin{equation}
+  \partial(f+\ind_{\Cset})(x)
+  =\partial f(x)+N_{\Cset}(x)
+  =\partial f(x)+\ran(A^\top),\qquad x\in\Cset\cap\dom f.
+  \label{eq:affine-sum-rule}
+\end{equation}
+This is the convex sum rule of \citet[Theorem~23.8]{Rockafellar1970},
+combined with the smooth-perturbation rule above.  Consequently,
+\cref{eq:kkt} is equivalent to
+\(0\in\partial(f+\ind_{\Cset})(x)\) under this qualification.
+The condition is automatic when \(f\) is finite everywhere.  A KKT pair
+always implies constrained stationarity; the qualification is needed for
+the converse existence of a multiplier.
+
+The lower model in \cref{eq:weak-convex-lower} uses the same global
+quadratic support that governs an exact nonconvex SDG value.  The appropriate
+pointwise object is the \emph{level-proximal subdifferential} introduced by
+\citet[Definition~3.2]{WangWang2024}.  We parameterize it by curvature rather
+than proximal stepsize: \(\beta=1/\lambda\) for \(\beta>0\).  At
+\(\beta=0\), we use the global affine-support endpoint identified in
+\citet[Proposition~3.6(v)]{WangWang2024}.
+
+\begin{definition}[Level-proximal subdifferential]
+  \label{def:level-prox}
+  Let \(h:\R^n\to\R\cup\{+\infty\}\) be proper, let
+  \(x\in\operatorname{dom}h\), and let \(\beta\ge0\).  For
+  \(g\in\R^n\),
+  \begin{equation}
+    g\in\partial_{\mathrm p}^{\beta}h(x)
+    \quad\Longleftrightarrow\quad
+    h(u)\ge h(x)+\ip{g}{u-x}
+      -\frac{\beta}{2}\norm{u-x}^2
+    \quad\text{for every }u\in\R^n .
+    \label{eq:level-prox}
+  \end{equation}
+\end{definition}
+
+Unlike the classical proximal subdifferential, which requires a quadratic
+support inequality only locally, \cref{eq:level-prox} is global.  Increasing
+\(\beta\) weakens the support inequality, and hence
+\begin{equation}
+  0\le\beta_1\le\beta_2
+  \quad\Longrightarrow\quad
+  \partial_{\mathrm p}^{\beta_1}h(x)
+  \subseteq
+  \partial_{\mathrm p}^{\beta_2}h(x).
+  \label{eq:level-prox-monotonicity}
+\end{equation}
+This monotonicity is proved in
+\citet[Proposition~3.6(ii)]{WangWang2024}.  The comparison with limiting
+stationarity below follows from
+\citet[Proposition~3.4(ii), Proposition~3.6(iv), and
+Theorem~3.9(i)]{WangWang2024}; the endpoint \(\beta=0\) is covered by
+\citet[Proposition~3.6(v)]{WangWang2024}, and the boundary
+\(\beta=\rho\) follows from the global weak-convexity model
+\citep[Lemma~2.1]{DavisDrusvyatskiy2019}.
+
+\begin{lemma}[Level-proximal and limiting subdifferentials]
+  \label{lem:level-prox-properties}
+  Let \(h\) be proper and lower semicontinuous.
+  \begin{enumerate}[label=(\roman*)]
+    \item For every \(\beta\ge0\),
+      \(\partial_{\mathrm p}^{\beta}h(x)\subseteq\partial h(x)\).
+    \item If \(h\) is \(\rho\)-weakly convex, then, for every
+      \(\beta\ge\rho\),
+      \begin{equation}
+        \partial_{\mathrm p}^{\beta}h(x)=\partial h(x).
+        \label{eq:level-prox-weak-convex}
+      \end{equation}
+  \end{enumerate}
+\end{lemma}
+
+Thus the level-proximal condition coincides with limiting stationarity
+throughout the uniform safe-curvature regime.  Below that regime it can be
+strictly stronger, because it records the least global quadratic support
+needed at the particular point.  The proximal representation of this support
+condition is introduced next.
+
+\subsection{Proximal and primal--dual constructions}
+
+\subsubsection{Moreau envelopes, proximal maps, and conjugacy}
+
+For \(\lambda>0\), the Moreau envelope and proximal mapping of
+\citet[Definition~1.22]{RockafellarWets1998} are
+\begin{align}
+  P_\lambda(z)=\prox_{\lambda f}(z)
+    &:=\argmin_{u\in\R^n}
+       \left\{f(u)+\frac{1}{2\lambda}\norm{u-z}^2\right\}, \label{eq:prox}\\
+  \Moreau_\lambda(z)
+    &:=\inf_{u\in\R^n}
+       \left\{f(u)+\frac{1}{2\lambda}\norm{u-z}^2\right\}. \label{eq:moreau}
+\end{align}
+In general, \(P_\lambda(z)\) may be set valued.  If \(f\) is
+\(\rho\)-weakly convex and \(\lambda\rho<1\), the proximal objective is
+\((\lambda^{-1}-\rho)\)-strongly convex.  The proximal mapping is then
+single valued, and the Moreau envelope is continuously differentiable with
+\begin{equation}
+  \nabla\Moreau_\lambda(z)
+    =\frac{1}{\lambda}
+      \bigl(z-\prox_{\lambda f}(z)\bigr).
+  \label{eq:moreau-gradient}
+\end{equation}
+Thus a proximal fixed point is exactly a zero of
+\(\nabla\Moreau_\lambda\), and
+\(\norm{\nabla\Moreau_\lambda(z)}\) is used as a smooth stationarity
+measure; see \citet[Lemma~2.2]{DavisDrusvyatskiy2019}.
+
+The level-proximal support condition has an exact proximal representation.
+For a proper lower-semicontinuous function \(h\), let
+\(\prox_{\lambda h}(z)\) denote the proximal argmin in
+\cref{eq:prox} with \(f\) replaced by \(h\).  For every \(\lambda>0\),
+\begin{equation}
+  p\in\prox_{\lambda h}(z)
+  \quad\Longleftrightarrow\quad
+  \frac{z-p}{\lambda}
+  \in\partial_{\mathrm p}^{1/\lambda}h(p),
+  \label{eq:level-prox-resolvent}
+\end{equation}
+which is the level-proximal resolvent relation of
+\citet[Proposition~3.4(ii)]{WangWang2024}.  Unlike a
+first-order optimality condition, \cref{eq:level-prox-resolvent}
+characterizes a global proximal minimizer even when the proximal objective is
+nonconvex.
+
+For the affine problem, it is useful to absorb feasibility into the objective:
+\begin{align}
+  P_\lambda^{\Cset}(z)
+    &:=\argmin_{u\in\Cset}
+       \left\{f(u)+\frac{1}{2\lambda}\norm{u-z}^2\right\}, \label{eq:cprox}\\
+  \Moreau_\lambda^{\Cset}(z)
+    &:=\inf_{u\in\Cset}
+       \left\{f(u)+\frac{1}{2\lambda}\norm{u-z}^2\right\}. \label{eq:cenvelope}
+\end{align}
+Since \(\ind_{\Cset}\) is convex, \(f+\ind_{\Cset}\) remains
+\(\rho\)-weakly convex.  Therefore the same safe condition
+\(\lambda\rho<1\) yields uniqueness on \(\Cset\).  Applying standard weakly
+convex Moreau calculus to \(h=f+\ind_{\Cset}\) gives the following result
+\citep[Lemma~2.5]{DavisDrusvyatskiy2022}.  It can equivalently be obtained by
+completing the square and using convex Moreau calculus
+\citep[Theorem~2.26 and Exercise~12.61]{RockafellarWets1998}; its fixed-point
+statement is the hypoconvex resolvent identity discussed by
+\citet[Theorems~3.1 and~3.7]{WangWang2024}.
+
+\begin{lemma}[Standard constrained Moreau calculus]
+  \label{lem:safe-constrained-prox}
+  Suppose that \(f+\ind_{\Cset}\) is proper, lower semicontinuous, and
+  \(\rho\)-weakly convex, and let \(\lambda>0\) with \(\lambda\rho<1\).  Then:
+  \begin{enumerate}[label=(\roman*)]
+    \item \(P_\lambda^{\Cset}\) is single valued and
+      \begin{equation}
+        \norm{P_\lambda^{\Cset}(z)-P_\lambda^{\Cset}(w)}
+        \le
+        \frac{1}{1-\lambda\rho}\norm{z-w};
+        \label{eq:constrained-prox-lipschitz}
+      \end{equation}
+    \item \(\Moreau_\lambda^{\Cset}\) is continuously differentiable, with
+      \begin{equation}
+        \nabla\Moreau_\lambda^{\Cset}(z)
+        =
+        \lambda^{-1}
+        \left(z-P_\lambda^{\Cset}(z)\right);
+        \label{eq:constrained-envelope-gradient}
+      \end{equation}
+    \item a feasible point \(x\) satisfies
+      \(P_\lambda^{\Cset}(x)=x\) if and only if
+      \(0\in\partial(f+\ind_{\Cset})(x)\).  If
+      \(\operatorname{ri}(\operatorname{dom}f)\cap\Cset\ne\varnothing\),
+      this is equivalent to the existence of a multiplier \(y\) for which
+      \((x,y)\) is a KKT pair.
+  \end{enumerate}
+\end{lemma}
+
+A zero constrained-envelope gradient therefore characterizes a stationary
+point of the constrained problem, not necessarily a global minimizer.
+
+The affine proximal oracle developed in \Cref{sec:affine-prox} also uses
+Fenchel conjugacy.  The Fenchel conjugate of a proper function \(h\) is
+\begin{equation}
+  h^*(q):=\sup_{u\in\R^n}\{\ip{q}{u}-h(u)\}.
+  \label{eq:fenchel-conjugate}
+\end{equation}
+This is the Legendre--Fenchel transform of
+\citet[Section~11.A]{RockafellarWets1998}.  If \(h\) is proper, lower
+semicontinuous, and \(\mu\)-strongly convex, then \(h^*\) is continuously
+differentiable and \(\nabla h^*\) is \(1/\mu\)-Lipschitz
+\citep[Proposition~12.60]{RockafellarWets1998}.  Applied to
+\(h(u)=\lambda f(u)+\norm{u}^{2}/2\), this identity yields the unconstrained
+proximal map and the smooth dual-root potential used later.
+
+\subsubsection{The self-centered smoothed duality gap}
+
+Quadratic regularization also turns the classical primal--dual gap into a
+finite proximal construction.  For a convex--concave Lagrangian, the
+unregularized gap at \((x,y)\) is
+\[
+  \sup_{u,v}\{\Lagr(x,v)-\Lagr(u,y)\}.
+\]
+It is nonnegative because \((u,v)=(x,y)\) is admissible, but it can be
+infinite.  Quadratically penalizing the comparison variables gives the
+self-centered SDG of \citet[Definitions~4--5]{Fercoq2023} and
+\citet[Definitions~9--10]{WalwilFercoq2025}:
+\begin{equation}
+  \G_{\beta_x,\beta_y}(x,y)
+  :=
+  \sup_{\substack{u\in\R^n\\v\in\R^m}}
+  \left\{
+    \Lagr(x,v)-\Lagr(u,y)
+    -\frac{\beta_x}{2}\norm{u-x}^2
+    -\frac{\beta_y}{2}\norm{v-y}^2
+  \right\},
+  \label{eq:sdg-definition}
+\end{equation}
+for \((x,y)\in\operatorname{dom}f\times\R^m\), with
+\(\beta_x,\beta_y>0\).  This parameterization uses curvature
+\(\beta_x=1/\lambda\).  Consequently the safe weak-convexity condition is
+\(\beta_x>\rho\), equivalently \(\lambda\rho<1\).
+
+In convex optimization, the SDG is a computable merit function with useful
+error bounds and algorithmic interpretations \citep{WalwilFercoq2025}.  Gap
+functions have also been developed for nonconvex constrained problems through
+weak conjugacy and augmented Lagrangians
+\citep{YalcinKasimbeyli2020}.  In the present weakly convex setting, however,
+the inner comparison in \cref{eq:sdg-definition} is global.  Local
+stationarity alone therefore cannot characterize its zero set.  The
+decomposition in the next section exposes the corresponding global support
+condition and brings the level-proximal calculus of
+\cref{eq:level-prox,eq:level-prox-resolvent} into the SDG analysis.

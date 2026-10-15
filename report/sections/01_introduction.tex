@@ -1,0 +1,268 @@
+\section{Introduction}
+\label{sec:introduction}
+
+A convergence theorem describes the limiting behavior of an infinite
+sequence, whereas a numerical method must stop at a finite iterate and decide
+what that iterate certifies.  The choice of stopping quantity is therefore
+part of the mathematical meaning of an algorithm.  The objective error
+\(f(x)-f^\star\), where \(f^\star\) is the optimal value, answers the desired
+question directly but is not generally computable.  A
+Karush--Kuhn--Tucker (KKT) residual is usually
+computable, but its interpretation changes with the geometry of the problem:
+in convex optimization it is an optimality residual, while in nonconvex
+optimization it is only a stationarity residual.
+
+For a convex--concave saddle problem, the primal--dual gap avoids this
+ambiguity.  It is nonnegative and vanishes exactly at a saddle point, thereby
+combining primal optimality, dual optimality, and feasibility in one scalar.
+The classical gap is nevertheless poorly suited to affine equality
+constraints on unbounded spaces.  The supremum over the multiplier is
+infinite whenever the current point is infeasible, and the primal comparison
+may also be infinite.  Penalizing both comparison variables quadratically
+leads to the \emph{smoothed duality gap} (SDG).  Its regularized comparison
+problems are proximal problems, so the gap can remain finite away from
+feasibility and can be evaluated without knowing an optimal solution.
+Smooth primal--dual gap constructions were developed for convex composite
+minimization in \cite{TranDinhFercoqCevher2018}; the self-centered SDG was
+introduced in \cite{Fercoq2023} and then studied systematically as a stopping
+criterion in \cite{WalwilFercoq2025}.
+
+The convex interpretation cannot be transferred merely by removing the word
+``convex''.  If \(f\) is proper, lower semicontinuous, and convex, every KKT
+pair is a saddle point of the ordinary Lagrangian and yields attained primal
+and dual optima with zero duality gap.  Conversely, when a primal solution
+exists and the affine feasible set intersects
+\(\operatorname{ri}(\operatorname{dom}f)\), strong duality and dual attainment
+hold and the solution admits a multiplier.
+Under these explicit hypotheses, the convex theory identifies
+\[
+  \text{saddle point}
+  \quad\Longleftrightarrow\quad
+  \text{KKT pair}
+  \quad\Longleftrightarrow\quad
+  \text{zero-gap primal--dual optimum}
+\]
+see \citet[Sections~5.4.2 and~5.5.3]{BoydVandenberghe2004} for the smooth
+formulation and \citet[Theorem~27.4]{Rockafellar1970} for the convex
+subdifferential condition under relative-interior qualification.  These
+equivalences break down in a nonconvex problem.  A KKT pair
+may represent a local minimum, a saddle, or a local
+maximum.  Consequently, before using the SDG beyond convexity, one must
+identify its exact zero set and distinguish the statement ``the gap is zero''
+from the much stronger statement ``the point is globally optimal''.  A
+zero-based stopping rule with the wrong interpretation would accept every KKT
+branch, including saddles and local maxima.
+
+\subsection{Problem setting}
+\label{subsec:problem-setting}
+
+Let \(A\in\R^{m\times n}\) and \(b\in\R^m\), and define the affine feasible
+set
+\[
+  \Cset:=\{x\in\R^n:Ax=b\}.
+\]
+No full-row-rank assumption is imposed on \(A\), and we assume that
+\(\Cset\cap\operatorname{dom}f\ne\varnothing\).  We study
+\begin{equation}
+  \min_{x\in\R^n} f(x)
+  \quad\text{subject to}\quad
+  Ax=b,
+  \label{eq:main-problem}
+\end{equation}
+where \(f\) is proper, lower semicontinuous, and \(\rho\)-weakly convex for a
+valid global modulus \(\rho\ge0\).  The chosen \(\rho\) need not be the
+smallest possible modulus.  By definition,
+\(f+\frac{\rho}{2}\norm{\cdot}^{2}\) is convex: the negative curvature of
+\(f\) is globally bounded by a quadratic model.  This class includes convex
+functions, smooth objectives with a uniform lower Hessian bound, and many
+nonsmooth nonconvex models used in learning and signal recovery
+\cite{DavisDrusvyatskiy2019}.  Controlled-concavity penalties such as SCAD
+\cite{FanLi2001} and MCP \cite{Zhang2010} are standard examples.  Weak
+convexity is therefore a useful intermediate regime: it is broad enough to
+contain genuine nonconvexity, yet a proximal term with curvature larger than
+\(\rho\) makes the regularized subproblem strongly convex.
+
+Affine constraints retain the essential primal--dual difficulty while
+keeping the geometry transparent.  They introduce feasibility, multipliers,
+and tangent and normal directions, but they also permit an exact nullspace
+description of feasible perturbations and a dual-root representation of the
+constrained proximal map.  Problem~\eqref{eq:main-problem} is consequently a
+controlled setting in which both the meaning of the SDG and the cost of
+evaluating the proximal objects behind it can be studied.  We write its
+ordinary Lagrangian as
+\(\Lagr(x,y):=f(x)+\ip{y}{Ax-b}\), with multiplier \(y\in\R^m\).
+
+The proximal curvature creates two distinct regimes.  If the primal
+smoothing curvature \(\beta_x\) is larger than \(\rho\), the inner SDG
+problem is strongly convex and has a unique global minimizer; we call this
+the uniform safe regime.  Below this threshold, the inner problem may be
+nonconvex and a local routine is not an oracle for the value-defined gap.
+At the same time, the global modulus
+\(\rho\) can be conservative at a fixed KKT pair.  The least curvature that
+supports the Lagrangian globally at that pair is a pointwise quantity, and
+different KKT pairs of the same problem may have different thresholds.  This
+distinction between a uniform safe regime and pointwise global support is
+closely related to the broader algorithmic difficulty of choosing a proximal
+parameter when the weak-convexity modulus is unknown
+\cite{Xie2026}.
+
+The available certificates differ both in conclusion and in evaluation cost.
+A KKT residual is local and computable.  In the safe regime, the SDG uses the
+Lagrangian proximal point
+\[
+  p_{\beta_x}(x,y)
+  :=\argmin_u\left\{\Lagr(u,y)
+       +\frac{\beta_x}{2}\norm{u-x}^2\right\}
+\]
+together with an explicit feasibility term, and its zero set is the KKT set.
+The rejection stage uses a different map, the hard-constrained safe prox
+with \(\lambda>0\) and \(\lambda\rho<1\),
+\[
+  P_\lambda^{\Cset}(z)
+  :=\argmin_{u\in\Cset}\left\{f(u)
+       +\frac{1}{2\lambda}\norm{u-z}^2\right\}.
+\]
+A zero global augmented-Lagrangian gap instead identifies a primal global
+minimizer and an augmented-dual maximizer
+\cite{Rockafellar1974,YalcinKasimbeyli2020}, but requires a global infimum of
+a generally nonconvex augmented Lagrangian and an attaining multiplier.  This
+leads to the intermediate question whether the hard-constrained safe prox can
+provide one-sided information beyond KKT without solving that global problem.
+
+The analysis is organized around three precise questions.  First, which
+variational condition is equivalent to zero SDG at arbitrary positive
+smoothing, and how does it simplify in the uniform regime
+\(\beta_x>\rho\)?  This question also asks for the least curvature required
+at one fixed KKT pair.  Second, once a stationary candidate has been found,
+can the hard-constrained safe proximal map exhibit a feasible point with
+strictly lower objective value, including when a reduced-Hessian test is
+inconclusive, and at what perturbation scale?  Third, on problems with
+complete analytic stationary catalogs, how do the SDG, Lagrangian proximal
+fixed-point residual, and KKT residual recover KKT branches, and how does
+proximal escape classify the recovered candidates?  These questions
+separate three notions that coincide in convex theory:
+\[
+  \text{first-order stationarity},\qquad
+  \text{local minimality},\qquad
+  \text{global optimality}.
+\]
+
+\subsection{Main results}
+\label{subsec:main-results}
+
+The first main result gives an exact description of what the weakly convex
+SDG certifies.  In the uniform safe regime, its zero set coincides with the KKT
+set, and the gap controls feasibility and a Lagrangian proximal fixed-point
+residual separately.  For an arbitrary positive curvature, zero gap is characterized
+through the level-proximal subdifferential.  This yields the pointwise
+threshold
+\[
+  \beta_{\crit}(x,y)
+  =
+  \sup_{\substack{u\in\dom f\\u\ne x}}
+  \frac{2[\Lagr(x,y)-\Lagr(u,y)]_+}{\norm{u-x}^{2}},
+\]
+which is bounded above by \(\rho\) at a KKT pair but may be strictly smaller.
+Exact quartic examples show both pair-dependent thresholds and the false
+zeros produced by a local inner solve.
+
+The second main result is a post-KKT rejection framework based on the
+proximal-escape radius, defined as the infimum of center-perturbation radii
+admitting a lower proximal image.  The ideal radius separates global minima,
+points that are not local minimizers, and nonglobal local minima.  A
+constrained Moreau-envelope surrogate gives a smooth outer search, while
+tangent-space reduction and an affine dual root implement the inner prox
+without replacing feasibility by a finite penalty.  Because the argument uses
+realized objective decrease rather than a quadratic model, it can also reject
+degenerate stationary points at which the reduced Hessian is inconclusive.
+
+The numerical study uses complete analytic stationary sets to compare branch
+discovery with post-KKT rejection, including a controlled shrinking-radius
+test at Hessian-flat stationary points.
+
+The work reported here comprises
+the analysis in \cref{sec:safe-sdg,sec:thresholds}, the escape classification
+and affine constructions in \cref{sec:escape}, and the analytic and numerical
+studies in \cref{sec:experiments}; the variational tools and connections to
+existing approaches are cited in \cref{sec:preliminaries,sec:related-work}.
+
+\subsection{Related work}
+\label{sec:related-work}
+
+The SDG analysis builds on the convex theory of smoothed gaps.
+Tran-Dinh, Fercoq, and Cevher introduced a smooth primal--dual framework for
+composite convex minimization \cite{TranDinhFercoqCevher2018}.  Fercoq
+introduced the self-centered smoothed gap \cite{Fercoq2023}; Walwil and Fercoq
+then developed it as a stopping criterion and compared it with the KKT error,
+projected duality gap, and objective-gap/feasibility measure
+\cite{WalwilFercoq2025}.  Their zero-gap interpretation uses the
+convex equivalence between KKT conditions, saddle points, and primal--dual
+optimality.  Here the same ordinary Lagrangian and self-centered smoothing are
+examined after this equivalence fails.
+
+Weakly convex Moreau-envelope theory provides regularity for both proximal
+constructions above, although their objectives and feasible domains differ.
+In the safe regime the envelope is continuously differentiable and its
+gradient is a standard stationarity measure \cite{DavisDrusvyatskiy2019}.
+Fixed points of the proximal map characterize stationarity rather than
+global optimality.  Xie's
+adaptive proximal framework addresses the
+complementary problem of taking accepted steps when the global
+weak-convexity parameter is unknown \cite{Xie2026}; the pointwise threshold
+here instead asks whether one fixed center globally minimizes its own
+proximal model.
+
+The variational object connecting the SDG zero set with global proximal
+support is the level-proximal subdifferential.  It represents proximal maps of
+possibly nonconvex functions as resolvents without restricting the function
+to the hypoconvex case \cite{WangWang2024}.  Unlike a local proximal
+subdifferential, it imposes a quadratic support inequality against every
+comparison point, precisely matching the global inner infimum in the SDG.
+This supplies the pointwise language for the zero-set and threshold results.
+
+Negative reduced-Hessian curvature is the classical local signature of a
+strict saddle, but it is silent at degenerate stationary points whose first
+and second derivatives vanish.  Higher-order escape methods use Taylor
+information beyond the Hessian \cite{AnandkumarGe2016}, while linear
+regularization can restore strict-saddle geometry in selected models
+\cite{UblHaleYazdani2023}.  For weakly convex objectives,
+\citet{DavisDrusvyatskiy2022} establish avoidance of active strict saddles
+by proximal methods under suitable structural and initialization assumptions.
+The present escape test asks a different question: whether proximal
+polishing at perturbed centers supplies a lower feasible value for a fixed
+candidate, including when negative Hessian curvature is absent.
+
+For a stronger global comparison, Rockafellar relates augmented Lagrangians
+to perturbation and stability
+\cite{Rockafellar1974}, while Din\c{c} Yal\c{c}\i n and Kasimbeyli develop zero-gap
+conditions through weak conjugacy and sharp augmentation
+\cite{YalcinKasimbeyli2020}.  Their global conclusions require the relevant
+stability, duality, and attainment hypotheses, and their dual functions retain
+a global inner optimization problem.  Weak conjugacy is an
+abstract-convexity construction, distinct from the \(\rho\)-weak convexity
+used here to regularize proximal subproblems.
+
+The algorithmic literature instead supplies appropriate comparisons for
+finding constrained stationary points.  MEAL/LiMEAL
+\cite{ZengYinZhou2022}, proximal augmented-Lagrangian methods
+\cite{ZhangLuo2020}, feasible descent and SQP schemes
+\cite{Rosen1960,LaleeNocedalPlantenga1998}, and distributed
+Douglas--Rachford splitting for weakly convex multi-block models
+\cite{HuXieCaiHan2025} are designed to approach stationary points or local
+solutions.  Efficient computation of affine-constrained proximal operators is
+itself a separate numerical problem; dual reduction and semismooth techniques
+for structured nonconvex prox subproblems are developed in
+\cite{HouTangTohWang2026}.  These works provide algorithmic context for
+stationary-point computation, while the constrained proximal constructions
+below support post-KKT rejection.
+
+The remainder is organized as follows.
+\Cref{sec:preliminaries} introduces the KKT system, weak convexity and
+level-proximal support, followed by proximal maps, Moreau envelopes, and the
+SDG.
+\Cref{sec:safe-sdg} establishes the safe zero-set theorem.
+\Cref{sec:thresholds} gives the pointwise support characterization and the
+counterexamples beyond the uniform threshold.  \Cref{sec:escape} develops
+the proximal-escape radius and its affine-constrained computation.
+\Cref{sec:experiments} reports the numerical experiments, and
+\Cref{sec:discussion} discusses their scope and concludes the report.

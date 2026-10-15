@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: "If you use this code, please cite the accompanying internship report."
+title: "Code for Smoothed Duality Gaps Beyond Convexity"
+type: software
+version: 1.0.0
+date-released: 2026-09-01
+authors:
+  - family-names: Luo
+    given-names: Xiangyu
+preferred-citation:
+  type: report
+  title: "Smoothed Duality Gaps Beyond Convexity: KKT Detection, Pointwise Smoothing Thresholds, and Proximal Escape under Affine Constraints"
+  year: 2026
+  authors:
+    - family-names: Luo
+      given-names: Xiangyu
+

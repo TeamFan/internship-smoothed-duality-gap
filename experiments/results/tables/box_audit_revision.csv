@@ -1,0 +1,4 @@
+method,legacy_accepted,revised_accepted,matched_endpoints,accepted_unmatched,distinct_roots,changed_decisions
+sc_sdg,101,101,101,0,27,0
+proximal_residual,109,109,109,0,10,0
+natural_kkt_residual,33,33,33,0,16,0

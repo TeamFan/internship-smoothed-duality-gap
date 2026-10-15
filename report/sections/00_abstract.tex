@@ -1,0 +1,40 @@
+\section*{Abstract}
+\addcontentsline{toc}{section}{Abstract}
+
+Smoothed duality gaps provide computable merit functions in convex primal--dual
+optimization.  We study their self-centered form for a
+\(\rho\)-weakly convex objective under affine constraints.  If
+\(\beta_x>\rho\) and \(\beta_y>0\), its zero set is exactly the
+Karush--Kuhn--Tucker (KKT) set, while the gap controls feasibility and a
+Lagrangian proximal fixed-point residual.  For arbitrary positive smoothing, the
+level-proximal subdifferential characterizes the zero set.  Its pointwise
+threshold is the least curvature globally supporting the Lagrangian at the
+given pair; at a KKT pair it is bounded by \(\rho\), but may be smaller and
+branch-dependent.  Quartic examples show that below the safe threshold,
+evaluating the value-defined gap requires a global inner proximal value: a
+center-initialized local solver may return a false zero.
+
+For comparison, a zero global augmented-Lagrangian gap identifies a primal
+global minimizer and an augmented-dual maximizer, but evaluating it retains a
+global nonconvex inner minimization.  We therefore propose a one-sided test
+using a different object, the hard-constrained safe proximal map
+\(P_\lambda^{\Cset}\).  A feasible perturbation is followed by proximal
+polishing; strict objective decrease rejects global optimality.  Under the
+stated assumptions, the escape radius distinguishes global minimizers,
+nonglobal local minimizers, and points that are not local minimizers.
+
+Experiments with complete analytic stationary catalogs compare the
+self-centered SDG, a Lagrangian proximal fixed-point residual, and a KKT
+residual as root-discovery objectives.  In the recorded \(256\)-start
+scrambled-Sobol' run on a separable weakly convex box problem, the SDG
+recovered all \(27\) analytic KKT branches; exact proximal-escape calculations
+then reject the exact representatives of all nonglobal branches.
+In the recorded shrinking-radius study,
+a degenerate radial example retains positive escape witnesses despite
+vanishing gradient and Hessian, while a flat global-minimum control
+analytically excludes any valid rejection witness.
+
+\vspace{0.7em}
+\noindent\textbf{Keywords:} weak convexity; smoothed duality gap;
+level-proximal subdifferential; KKT conditions; affine constraints;
+optimality rejection.

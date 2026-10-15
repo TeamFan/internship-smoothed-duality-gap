@@ -1,0 +1,180 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage[english]{babel}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage[a4paper,margin=28mm,headheight=14pt]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools,bm}
+\usepackage{booktabs,tabularx,array,multirow}
+\usepackage{graphicx}
+\usepackage{caption,subcaption}
+\usepackage{enumitem}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{placeins}
+\usepackage{siunitx}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{aliascnt}
+\numberwithin{equation}{section}
+\numberwithin{figure}{section}
+\numberwithin{table}{section}
+\numberwithin{algorithm}{section}
+\usepackage{hyperref}
+\usepackage[nameinlink,noabbrev]{cleveref}
+
+\definecolor{linkblue}{RGB}{28,70,120}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=linkblue,
+  citecolor=linkblue,
+  urlcolor=linkblue,
+  pdftitle={Smoothed Duality Gaps Beyond Convexity},
+  pdfauthor={Xiangyu Luo}
+}
+\setlength{\parindent}{1.3em}
+\setlength{\parskip}{0.15em}
+\clubpenalty=10000
+\widowpenalty=10000
+\displaywidowpenalty=10000
+\brokenpenalty=10000
+\raggedbottom
+\renewcommand{\topfraction}{0.9}
+\renewcommand{\bottomfraction}{0.8}
+\renewcommand{\textfraction}{0.08}
+\renewcommand{\floatpagefraction}{0.75}
+\setlist{nosep,leftmargin=*}
+\captionsetup{
+  font=small,
+  labelfont=bf,
+  textfont=normalfont,
+  format=plain,
+  labelsep=space,
+  justification=justified,
+  singlelinecheck=false
+}
+\captionsetup[figure]{name=Fig.,position=bottom,skip=6pt}
+\captionsetup[table]{position=top,skip=5pt}
+\captionsetup[algorithm]{position=top,skip=5pt}
+\sisetup{detect-all,group-separator={,},group-minimum-digits=4,group-digits=integer}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{Xiangyu Luo}
+\fancyhead[R]{Smoothed duality gaps beyond convexity}
+\fancyfoot[C]{\thepage}
+
+\newtheorem{theorem}{Theorem}[section]
+\newaliascnt{proposition}{theorem}
+\newtheorem{proposition}[proposition]{Proposition}
+\aliascntresetthe{proposition}
+\newaliascnt{lemma}{theorem}
+\newtheorem{lemma}[lemma]{Lemma}
+\aliascntresetthe{lemma}
+\newaliascnt{corollary}{theorem}
+\newtheorem{corollary}[corollary]{Corollary}
+\aliascntresetthe{corollary}
+\theoremstyle{definition}
+\newaliascnt{definition}{theorem}
+\newtheorem{definition}[definition]{Definition}
+\aliascntresetthe{definition}
+\newaliascnt{example}{theorem}
+\newtheorem{example}[example]{Example}
+\aliascntresetthe{example}
+\newaliascnt{assumption}{theorem}
+\newtheorem{assumption}[assumption]{Assumption}
+\aliascntresetthe{assumption}
+\theoremstyle{remark}
+\newaliascnt{remark}{theorem}
+\newtheorem{remark}[remark]{Remark}
+\aliascntresetthe{remark}
+
+\crefname{section}{Section}{Sections}
+\crefname{theorem}{Theorem}{Theorems}
+\crefname{proposition}{Proposition}{Propositions}
+\crefname{lemma}{Lemma}{Lemmas}
+\crefname{corollary}{Corollary}{Corollaries}
+\crefname{definition}{Definition}{Definitions}
+\crefname{example}{Example}{Examples}
+\crefname{remark}{Remark}{Remarks}
+\crefname{assumption}{Assumption}{Assumptions}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\ip}[2]{\left\langle #1,#2\right\rangle}
+\newcommand{\norm}[1]{\left\lVert #1\right\rVert}
+\newcommand{\dist}{\operatorname{dist}}
+\newcommand{\argmin}{\operatorname*{arg\,min}}
+\newcommand{\argmax}{\operatorname*{arg\,max}}
+\newcommand{\prox}{\operatorname{prox}}
+\newcommand{\ran}{\operatorname{range}}
+\newcommand{\crit}{\mathrm{crit}}
+\newcommand{\Tspace}{\mathcal{T}}
+\newcommand{\Cset}{\mathcal{C}}
+\newcommand{\G}{\mathcal{G}}
+\newcommand{\Lagr}{\mathcal{L}}
+\newcommand{\Moreau}{\mathcal{E}}
+\newcommand{\Rprox}{\mathcal{R}}
+\newcommand{\ind}{\delta}
+\DeclareMathOperator{\sign}{sign}
+\DeclareMathOperator{\Diag}{Diag}
+\DeclareMathOperator{\dom}{dom}
+
+\begin{document}
+\hypersetup{pageanchor=false}
+
+\begin{titlepage}
+  \centering
+  \vspace*{1.2cm}
+  {\Large Universit\'e Paris-Saclay\par}
+  \vspace{0.25cm}
+  {\large Master 2 Optimisation\par}
+  \vspace{1.8cm}
+  {\huge\bfseries Smoothed Duality Gaps Beyond Convexity\par}
+  \vspace{0.35cm}
+  {\Large KKT Detection, Pointwise Smoothing Thresholds,\\
+  and Proximal Escape under Affine Constraints\par}
+  \vspace{1.7cm}
+  {\Large\bfseries Internship report\par}
+  \vspace{0.45cm}
+  {\large Xiangyu Luo\par}
+  \vfill
+  \begin{tabular}{@{}ll@{}}
+    Host institution: & T\'el\'ecom Paris, LTCI (S2A/IDS)\\
+    Internship supervisor: & Olivier Fercoq (T\'el\'ecom Paris, LTCI)\\
+    Academic advisor: & Quentin M\'erigot (Universit\'e Paris-Saclay, LMO)\\
+    Internship period: & 1 April--30 September 2026\\
+    Academic year: & 2025--2026
+  \end{tabular}
+  \vfill
+\end{titlepage}
+
+\hypersetup{pageanchor=true}
+\pagenumbering{roman}
+\input{sections/00_abstract}
+\clearpage
+\setcounter{tocdepth}{2}
+\tableofcontents
+\clearpage
+\pagenumbering{arabic}
+
+\input{sections/01_introduction}
+\input{sections/02_preliminaries}
+\input{sections/03_sdg}
+\input{sections/04_thresholds}
+\input{sections/05_escape}
+\input{sections/05b_affine_prox}
+\input{sections/07_experiments}
+\input{sections/08_discussion}
+
+\begingroup
+\small
+\setlength{\bibsep}{0pt}
+\interlinepenalty=10000
+  \bibliographystyle{unsrtnat}
+\bibliography{references}
+\endgroup
+
+\end{document}

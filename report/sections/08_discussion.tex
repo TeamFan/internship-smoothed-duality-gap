@@ -1,0 +1,30 @@
+\FloatBarrier
+\section{Discussion and conclusion}
+\label{sec:discussion}
+
+The SDG results separate a uniform computational regime from an exact
+pointwise characterization.  If \(\beta_x>\rho\), the primal comparison
+problem is strongly convex, the self-centered SDG vanishes exactly at KKT
+pairs, and its value controls feasibility and proximal displacement.  At an
+arbitrary positive curvature, zero gap is equivalent to global quadratic
+support of the fixed Lagrangian, measured by \(\beta_{\crit}(x,y)\).  The
+threshold can vary across KKT branches and explains the false numerical zeros
+produced by a nonglobal local inner solution.  The stronger zero
+interpretation of the global augmented-Lagrangian gap requires a global
+nonconvex value problem.
+
+For post-KKT assessment, proximal escape uses a second safe construction: the
+hard-constrained proximal map of \(f+\ind_{\Cset}\), distinct from the
+Lagrangian proximal comparison in the SDG.  Its ideal radius is infinite at a
+global minimizer, finite and positive at a nonglobal local minimizer, and zero
+at a point that is not locally minimizing.  Complete stationary catalogs
+assess branch recovery, the separable box problem verifies the radius
+trichotomy, and the Hessian-flat illustration shows that realized value decrease
+can reject stationary points with vanishing gradient and Hessian.
+
+The conclusions assume global \(\rho\)-weak convexity, affine constraints, and
+reliable evaluation of the relevant safe proximal subproblems.  Computing
+\(\beta_{\crit}(x,y)\) remains a global problem.  The finite rule in
+\Cref{alg:safe-finite-escape} accepts a verified lower feasible value as a
+rejection certificate and records every other finite-search outcome as
+unresolved.

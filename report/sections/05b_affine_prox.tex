@@ -1,0 +1,486 @@
+\subsection{Affine proximal oracles}
+\label{sec:affine-prox}
+
+Two exact reductions implement the hard-constrained proximal map while
+preserving affine feasibility.  The first works directly in the tangent
+space; the second enforces the constraint by solving a dual root.
+
+\subsubsection{Tangent-space reduction}
+
+Let
+\begin{equation}
+  P_{\Tspace}
+  :=I-A^\top(AA^\top)^\dagger A
+  \label{eq:tangent-projector}
+\end{equation}
+be the orthogonal projector onto \(\ker A\), where \({}^\dagger\) denotes the
+Moore--Penrose inverse.  The orthogonal normal projector is
+\(P_{\Tspace^\perp}=I-P_{\Tspace}\).
+
+\begin{lemma}[Normal invariance]
+  \label{lem:normal-invariance}
+  For every \(z,s\in\R^n\),
+  \begin{equation}
+    P_\lambda^{\Cset}(z+s)
+    =
+    P_\lambda^{\Cset}(z+P_{\Tspace}s).
+    \label{eq:normal-invariance}
+  \end{equation}
+\end{lemma}
+
+\begin{proof}
+  Fix any \(c\in\Cset\).  Every \(u\in\Cset\) can be written as
+  \(u=c+t\) with \(t\in\Tspace\).  Orthogonal decomposition gives
+  \[
+    \norm{u-(z+s)}^2
+    =
+    \norm{t-P_{\Tspace}(z+s-c)}^2
+    +
+    \norm{P_{\Tspace^\perp}(z+s-c)}^2.
+  \]
+  The second term is independent of \(u\), while
+  \[
+    P_{\Tspace}(z+s-c)
+    =
+    P_{\Tspace}(z+P_{\Tspace}s-c).
+  \]
+  Hence the two proximal objectives differ on \(\Cset\) only by an additive
+  constant.  Their unique minimizers are equal.
+\end{proof}
+
+Normal invariance also shows that restricting the outer search to the tangent
+space loses no polished values:
+\begin{equation}
+  \inf_{\substack{s\in\R^n\\\norm s\le\delta}}
+  f\!\left(P_\lambda^{\Cset}(x+s)\right)
+  =
+  \inf_{\substack{d\in\Tspace\\\norm d\le\delta}}
+  f\!\left(P_\lambda^{\Cset}(x+d)\right).
+  \label{eq:fullspace-outer}
+\end{equation}
+Indeed, \(P_{\Tspace}s\) has norm no larger than \(s\) and gives the same
+proximal point, while every tangent \(d\) is already an admissible
+  full-space perturbation.  Equation~\eqref{eq:fullspace-outer} shows that
+  normal components are computationally redundant as escape directions.
+
+If \(N\in\R^{n\times k}\) has orthonormal columns spanning \(\Tspace\), every
+feasible point has the form \(x+Nq\) for a fixed feasible \(x\).  For a tangent
+center \(x+N\xi\),
+\begin{equation}
+  P_\lambda^{\Cset}(x+N\xi)
+  =
+  x+N\argmin_q
+  \left\{
+    f(x+Nq)+\frac{1}{2\lambda}\norm{q-\xi}^2
+  \right\}.
+  \label{eq:nullspace-prox}
+\end{equation}
+Indeed, \(\norm{N(q-\xi)}=\norm{q-\xi}\), and injectivity of \(N\) makes
+  the reduced minimizer unique.  The formula removes the full-space affine
+  condition algebraically.
+The nullspace formulation is attractive when \(k=n-\operatorname{rank}A\)
+is small.  It enforces feasibility exactly in the mathematical formulation
+and, in floating-point arithmetic, up to the tolerance of the nullspace
+linear algebra, without introducing a penalty parameter.
+
+\subsubsection{Dual-root reduction}
+
+When the unconstrained prox of \(f\) is easier than the nullspace problem, the
+affine constraint can instead be enforced through the dual-root construction
+of \citet[Section~2.1]{HouTangTohWang2026}, specialized here to the Euclidean root map
+\begin{equation}
+  H_z(w)
+  :=
+  A\prox_{\lambda f}(z+A^\top w)-b.
+  \label{eq:dual-root}
+\end{equation}
+
+\begin{proposition}[Exact affine-prox recovery from a dual root]
+  \label{prop:dual-recovery}
+  Suppose \(f\) is proper, lower semicontinuous, and
+  \(\rho\)-weakly convex, and \(\lambda>0\) with \(\lambda\rho<1\).  If \(H_z(w)=0\), then
+  \begin{equation}
+    p=\prox_{\lambda f}(z+A^\top w)
+    \label{eq:dual-recovery}
+  \end{equation}
+  is the unique point \(P_\lambda^{\Cset}(z)\).
+\end{proposition}
+
+\begin{proof}
+  The root condition makes \(p\) feasible.  For every \(u\in\Cset\),
+  \begin{align*}
+    \norm{u-(z+A^\top w)}^{2}-\norm{u-z}^{2}
+    &=
+    -2\ip{A(u-z)}{w}+\norm{A^\top w}^{2}\\
+    &=
+    -2\ip{b-Az}{w}+\norm{A^\top w}^{2},
+  \end{align*}
+  which is independent of \(u\).  The point \(p\) globally minimizes the
+  shifted unconstrained proximal objective and belongs to \(\Cset\);
+  therefore it also minimizes that objective over \(\Cset\).  Removing the
+  displayed constant shows that it minimizes the constrained proximal
+  objective centered at \(z\).  Uniqueness follows from
+  \(\lambda\rho<1\).
+\end{proof}
+
+\begin{proposition}[Dual-root existence under affine qualification]
+  \label{prop:dual-root-existence}
+  In addition to the assumptions of \Cref{prop:dual-recovery}, suppose that
+  \begin{equation}
+    \Cset\cap\operatorname{ri}(\operatorname{dom}f)\ne\varnothing.
+    \label{eq:dual-root-cq}
+  \end{equation}
+  Then, for every center \(z\in\R^n\), the equation \(H_z(w)=0\) has at
+  least one solution.
+\end{proposition}
+
+\begin{proof}
+  Let \(p=P_\lambda^{\Cset}(z)\).  The function
+  \[
+    u\longmapsto
+    \lambda f(u)+\frac12\norm{u-z}^{2}
+  \]
+  is proper, lower semicontinuous, and
+  \((1-\lambda\rho)\)-strongly convex.  The relative-interior condition
+  \eqref{eq:dual-root-cq} is the standard qualification for its restriction
+  to \(Au=b\).  The exact affine sum rule and convex Fermat rule therefore
+  produce a multiplier \(\eta\) such that
+  \begin{equation}
+    0
+    \in
+    \lambda\partial f(p)+p-z+A^\top\eta,
+    \qquad
+    Ap=b
+    \label{eq:prox-affine-kkt}
+  \end{equation}
+  by \cref{eq:affine-sum-rule} and the Fermat rule
+  \citep[Theorem~10.1]{RockafellarWets1998}.  Set
+  \(w=-\eta\).  The first inclusion in \cref{eq:prox-affine-kkt} is
+  equivalent to
+  \[
+    p=\prox_{\lambda f}(z+A^\top w),
+  \]
+  because the shifted unconstrained proximal objective is strongly convex.
+  The feasibility equation then gives \(H_z(w)=0\).
+\end{proof}
+
+The root map has an underlying convex potential.  Define
+\[
+  h(u):=\lambda f(u)+\frac12\norm u^{2},
+  \qquad
+  \Psi_z(w):=h^*(z+A^\top w)-\ip{b}{w}.
+\]
+The function \(h\) is \((1-\lambda\rho)\)-strongly convex; hence \(h^*\) is
+differentiable and
+\(\nabla h^*(q)=\prox_{\lambda f}(q)\).  It follows that
+\begin{equation}
+  \nabla\Psi_z(w)=H_z(w),
+  \qquad
+  \operatorname{Lip}(H_z)
+  \le\frac{\norm A^{2}}{1-\lambda\rho}.
+  \label{eq:dual-potential}
+\end{equation}
+Hence \(H_z\) is a monotone Lipschitz gradient field; convexity pertains to the
+scalar potential \(\Psi_z\).
+
+Any root in \Cref{prop:dual-recovery} recovers the affine proximal point; the
+qualification in \Cref{prop:dual-root-existence} guarantees existence, while
+the multiplier \(w\) may be nonunique.  The safe weak-convexity condition
+makes the shifted proximal point the unique global solution used by the
+escape certificate.
+
+\subsection{Numerical search and rejection}
+
+\subsubsection{Projected envelope search}
+
+Using these proximal oracles, fix the KKT candidate \(x\) and
+a trial radius \(\delta>0\), and minimize
+\(F(d):=\Moreau_\lambda^{\Cset}(x+d)\) over
+\(D_\delta=\Tspace\cap B_\delta(0)\).  Here the optimization variable is the
+center perturbation \(d\), not the candidate \(x\).  Finding any
+\(d\in D_\delta\) with \(F(d)<f(x)\) is sufficient: the recovered point
+\(p=P_\lambda^{\Cset}(x+d)\) then satisfies
+\(f(p)\le F(d)<f(x)\) by \cref{eq:recovery-identity}.
+
+Projected gradient descent provides one way of generating trial
+perturbations.  At iteration \(k\), a constrained proximal evaluation gives
+both \(F(d_k)\) and its gradient.  Since the center \(z_k=x+d_k\) and the
+proximal output are feasible, their difference belongs to \(\Tspace\).
+Projecting the gradient step back onto \(D_\delta\) retains the radius
+constraint:
+\begin{align}
+  z_k&=x+d_k, &
+  p_k&=P_\lambda^{\Cset}(z_k), &
+  g_k&=\lambda^{-1}(z_k-p_k),\nonumber\\
+  d_{k+1}
+  &=
+  \Pi_{\Tspace\cap B_\delta(0)}
+       (d_k-\alpha_k g_k).
+  \label{eq:outer-pg}
+\end{align}
+To choose a stepsize, note that
+\(\Moreau_\lambda^{\Cset}\) is the Moreau envelope of the proper,
+lower-semicontinuous, \(\rho\)-weakly convex function
+\(f+\ind_{\Cset}\).  Standard weakly convex Moreau calculus therefore gives
+\begin{equation}
+  L_E
+  :=
+  \max\left\{
+    \frac{1}{\lambda},
+    \frac{\rho}{1-\lambda\rho}
+  \right\}
+  \label{eq:envelope-lipschitz-bound}
+\end{equation}
+\noindent as a Lipschitz constant for its gradient
+\citep[Lemma~2.5]{DavisDrusvyatskiy2022}.
+Specialize \(\alpha_k\equiv\alpha\) with \(0<\alpha\le L_E^{-1}\).  The projection
+variational inequality and the descent lemma give
+\begin{align}
+  F(d_{k+1})
+  &\le
+  F(d_k)-\frac{1}{2\alpha}\norm{d_{k+1}-d_k}^{2}\nonumber\\
+  &=
+  F(d_k)-\frac{\alpha}{2}
+  \norm{\mathcal{G}_{\alpha}(d_k)}^{2},
+  \qquad
+  \mathcal{G}_{\alpha}(d)
+  :=
+  \alpha^{-1}
+  \left[
+    d-\Pi_{D_\delta}(d-\alpha\nabla F(d))
+  \right].
+  \label{eq:outer-pg-descent}
+\end{align}
+For example, the first line follows from
+\(\ip{\nabla F(d_k)}{d_{k+1}-d_k}
+\le-\alpha^{-1}\norm{d_{k+1}-d_k}^{2}\), followed by the
+\(L_E\)-smooth descent bound.  The argument is the classical
+gradient-projection mechanism \cite{Rosen1960}, here applied to the safe
+envelope.  This descent estimate uses an exact proximal point.  The following
+bound records the effect of an inexact inner solve.
+
+\begin{lemma}[Inexact projected-envelope step]
+  \label{lem:inexact-envelope-step}
+  Set \(z=x+d\), \(\mu_\lambda=\lambda^{-1}-\rho>0\), and
+  \(Q_z(u)=f(u)+\ind_{\Cset}(u)+\norm{u-z}^2/(2\lambda)\).
+  Suppose \(\dist(0,\partial Q_z(\widehat p))\le\varepsilon\), and let
+  \(\widehat g=(z-\widehat p)/\lambda\).  Then
+  \begin{align}
+    \norm{\widehat p-P_\lambda^{\Cset}(z)}
+      &\le\frac{\varepsilon}{\mu_\lambda},&
+    0\le Q_z(\widehat p)-\Moreau_\lambda^{\Cset}(z)
+      &\le\frac{\varepsilon^2}{2\mu_\lambda},\nonumber\\
+    \norm{\widehat g-\nabla F(d)}
+      &\le\frac{\varepsilon}{1-\lambda\rho}.
+      \label{eq:inexact-envelope-gradient}
+  \end{align}
+  For \(d^+=\Pi_{D_\delta}(d-\alpha\widehat g)\), with
+  \(0<\alpha\le L_E^{-1}\),
+  \begin{equation}
+    F(d^+)\le F(d)-\frac{1}{4\alpha}\norm{d^+-d}^2
+      +\frac{\alpha\varepsilon^2}{(1-\lambda\rho)^2}.
+    \label{eq:inexact-envelope-descent}
+  \end{equation}
+\end{lemma}
+
+\begin{proof}
+  Apply the strong-convexity argument of \Cref{lem:inexact-safe-prox}
+  to \(Q_z\); the gradient estimate follows by dividing the point error
+  by \(\lambda\).  Writing \(s=d^+-d\), the projection inequality and
+  \(L_E\)-smoothness give
+  \[
+    F(d^+)\le F(d)-\frac{\norm s^2}{2\alpha}
+       +\norm{\widehat g-\nabla F(d)}\norm s.
+  \]
+  Use \(ab\le a^2/(4\alpha)+\alpha b^2\) to conclude.
+\end{proof}
+
+The residual here includes the constraint normal cone.  In particular,
+the hypothesis requires a feasible inner point; a small dual-root
+feasibility residual alone is not this bound.  A fixed inner tolerance
+permits an additive error in descent, rather than the exact monotonicity
+of \cref{eq:outer-pg-descent}.
+
+At a KKT candidate, \(P_\lambda^{\Cset}(x)=x\), so initialization at
+\(d_0=0\) would leave the iteration at zero.  Nonzero initial perturbations,
+possibly with restarts, are therefore needed.  Descent of \(F\) does not by
+itself guarantee that its value falls below \(f(x)\); the envelope and
+polished values must be tested against that fixed reference value.
+
+A finite collection of the generated perturbations can be used as the set
+\(\mathcal D\) in \Cref{alg:safe-finite-escape}.  That algorithm handles the
+rejection decision, whereas \cref{eq:outer-pg} supplies trial centers.
+The proximal evaluations use the reductions in \Cref{sec:affine-prox};
+the rejection test below also addresses inexact inner solves.
+
+\subsubsection{Warm starts and dual-root stopping}
+
+Let \((x,\phi)\) be a KKT pair of \cref{eq:main-problem}.  At the unperturbed
+center, the exact dual root is
+\begin{equation}
+  w_x=-\lambda\phi,
+  \label{eq:centered-warm-start}
+\end{equation}
+because
+\[
+  x=\prox_{\lambda f}(x-\lambda A^\top\phi).
+\]
+For a perturbed center \(x+s\), define the normal correction
+\begin{equation}
+  q_s:=(AA^\top)^\dagger As,
+  \qquad
+  w^{(0)}(s):=-\lambda\phi-q_s.
+  \label{eq:normal-corrected-warm}
+\end{equation}
+Then
+\begin{equation}
+  x+s+A^\top w^{(0)}(s)
+  =
+  x+P_{\Tspace}s-\lambda A^\top\phi.
+  \label{eq:warm-input-identity}
+\end{equation}
+A purely normal change in the center is corrected exactly.  For a tangent
+change, \cref{eq:warm-input-identity} gives the identity
+\begin{equation}
+  H_{x+s}(w^{(0)}(s))
+  =
+  H_{x+P_{\Tspace}s}(-\lambda\phi).
+  \label{eq:warm-residual-identity}
+\end{equation}
+Since \(H_x(-\lambda\phi)=0\), Lipschitz continuity of the safe
+unconstrained prox then gives the initial residual bound
+\begin{equation}
+  \norm{H_{x+s}(w^{(0)}(s))}
+  \le
+  \frac{\norm A}{1-\lambda\rho}
+  \norm{P_{\Tspace}s}.
+  \label{eq:warm-residual-bound}
+\end{equation}
+
+\begin{remark}[Scope of the residual bound]
+  Equation~\eqref{eq:warm-residual-bound} controls the initial residual.
+  Distance to a selected multiplier additionally requires metric regularity
+  or strong monotonicity because multipliers may be nonunique and nonsmooth
+  proximal maps may generate an interval of dual roots.
+\end{remark}
+
+The same potential supplies a safeguard for a basic root iteration.  Let
+\[
+  L_H:=\frac{\norm A^2}{1-\lambda\rho}
+\]
+and, when \(L_H>0\), take \(0<\eta\le L_H^{-1}\).  The gradient step
+\begin{equation}
+  w^+=w-\eta H_z(w)
+  \label{eq:dual-gradient-step}
+\end{equation}
+satisfies
+\begin{equation}
+  \Psi_z(w^+)
+  \le
+  \Psi_z(w)-\frac{\eta}{2}\norm{H_z(w)}^2.
+  \label{eq:dual-potential-descent}
+\end{equation}
+Indeed, \cref{eq:dual-potential} and the smooth descent lemma yield the
+stronger coefficient
+\(\eta(1-\eta L_H/2)\ge\eta/2\).  Backtracking may enforce the displayed
+decrease without knowing a sharp Lipschitz constant.
+
+If
+\(\widetilde p=\prox_{\lambda f}(z+A^\top w)\), then
+\begin{equation}
+  \norm{H_z(w)}=\norm{A\widetilde p-b}
+  \label{eq:dual-feasibility-residual}
+\end{equation}
+is exactly the affine feasibility residual of the shifted unconstrained
+proximal point.  Together with descent of \(\Psi_z\), it is a natural stopping
+diagnostic.  Translating it into objective-value accuracy additionally
+requires control of the dual-root error and of any inexact unconstrained prox
+computation.
+
+\subsubsection{Finite rejection certificates}
+
+A finite search retains the one-sided validity of the ideal definition.
+Given centers \(d_1,\ldots,d_N\in\Tspace\cap B_\delta(0)\), let
+\begin{equation}
+  \widehat{\Rprox}_{\lambda,\delta}^{(N)}(x)
+  :=
+  \max_{1\le i\le N}
+  \left[
+    f(x)-f\!\left(P_\lambda^{\Cset}(x+d_i)\right)
+  \right]_+.
+  \label{eq:finite-escape}
+\end{equation}
+By construction,
+\begin{equation}
+  0
+  \le
+  \widehat{\Rprox}_{\lambda,\delta}^{(N)}(x)
+  \le
+  \Rprox_{\lambda,\delta}(x).
+  \label{eq:finite-escape-bound}
+\end{equation}
+Hence a positive sampled value certifies rejection when the inner affine
+proximal points are exact or accompanied by rigorous feasible value bounds.
+With floating-point values, the comparison should require
+\[
+  f(u)\le f(x)-\tau_{\rm cert},
+\]
+where \(\tau_{\rm cert}>0\) dominates a certified bound on the combined
+evaluation and inner-solve error.  A zero sampled value does not certify the
+absence of an unsampled escape.  Equivalently, if validated objective
+enclosures are available, the test is
+\[
+  f(x)\in[\underline f_x,\overline f_x],\quad
+  f(u)\in[\underline f_u,\overline f_u],\quad
+  \overline f_u<\underline f_x,
+\]
+for a certified feasible \(u\).  A small floating-point feasibility
+residual alone does not establish the existence of such a feasible witness.
+
+An inexact nullspace computation may still return an explicitly feasible
+point \(u=x+Nq\).  A certified inequality \(f(u)<f(x)\) then gives a direct
+rejection witness independently of reduced-proximal optimality; identifying
+it with the sampled proximal value in \cref{eq:finite-escape} additionally
+requires inner optimality.  A dual iterate with \(H_z(w)\ne0\) is infeasible,
+so its objective value becomes admissible only after obtaining a certified
+feasible point or a problem-specific error enclosure.
+\Cref{alg:safe-finite-escape} summarizes the decision logic.
+
+\begin{algorithm}[htbp]
+  \caption{Finite proximal-escape search with certified rejection}
+  \label{alg:safe-finite-escape}
+  \begin{algorithmic}[1]
+    \Require KKT candidate \(x\in\Cset\); parameter
+      \(\lambda>0\) with \(\lambda\rho<1\); radius \(\delta>0\); finite set
+      \(\mathcal D\subset\Tspace\cap B_\delta(0)\)
+    \Ensure \textsc{rejected} with a feasible witness, or
+      \textsc{unresolved}
+    \For{\(d\in\mathcal D\)}
+      \State \(z\gets x+d\)
+      \State attempt to compute \(P_\lambda^{\Cset}(z)\) by
+        \cref{eq:nullspace-prox} or by a certified root of
+        \cref{eq:dual-root}
+      \If{the inner computation certifies a point \(u\in\Cset\) and
+          \(f(u)<f(x)\)}
+        \State \Return \textsc{rejected} with witness \(u\)
+      \EndIf
+    \EndFor
+    \State \Return \textsc{unresolved}
+  \end{algorithmic}
+\end{algorithm}
+\FloatBarrier
+
+Directional coverage remains a limitation in high dimension.  If an escape
+cone has relative spherical measure \(p\), then \(N\) independent uniform
+directions hit it with probability \(1-(1-p)^N\).  Narrow cones can have
+rapidly vanishing \(p\) as the tangent dimension grows.  Adaptive directions,
+structured subspace searches, or problem-specific deterministic directions
+are therefore needed as the tangent dimension grows.
+
+Replacing \(Au=b\) in \cref{eq:cprox} by a penalty
+\(\gamma\norm{Au-b}^2/2\) produces a different problem for every finite
+\(\gamma\).  An infeasible point may have lower raw objective than every
+feasible point and can therefore create a false rejection even when its
+constraint residual is small.  Using such an output as an exact feasible
+rejection certificate requires an error analysis that converts infeasibility
+and objective error into a valid feasible bound.

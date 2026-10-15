@@ -1,0 +1,23 @@
+{
+  "affine": {
+    "beta_x": 5.0,
+    "beta_y": 1.0,
+    "catalog_residual_max": 1.2285024150792291e-15,
+    "rho": 4.0,
+    "seed": 20260709
+  },
+  "box": {
+    "beta_x": 3.0,
+    "beta_y": 1.0,
+    "catalog_residual_max": 1.2774791174414736e-16,
+    "rho": 2.239988156431174,
+    "seed": 20260709
+  },
+  "config": "config/report.json",
+  "elapsed_seconds": 7.639210500001354,
+  "matplotlib": "3.10.7",
+  "numpy": "2.3.5",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "python": "3.14.0",
+  "scipy": "1.16.3"
+}

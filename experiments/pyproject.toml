@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sdg-report-experiments"
+version = "1.0.0"
+description = "Numerical experiments for Smoothed Duality Gaps Beyond Convexity"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [
+  {name = "Xiangyu Luo"},
+]
+dependencies = [
+  "numpy==2.3.5",
+  "scipy==1.16.3",
+  "matplotlib==3.10.7",
+]
+
+[project.scripts]
+reproduce-sdg-report = "sdg_report_experiments.runner:main"
+
+[tool.setuptools]
+packages = ["sdg_report_experiments"]
+package-dir = {sdg_report_experiments = "src"}
